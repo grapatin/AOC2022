@@ -32,3 +32,17 @@ def problem_a(input_string, expected_result):
 problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
 problem_a(PROGBLEM_INPUT_TXT, 0)
 print("\n")
+
+def problem_b(input_string, expected_result):
+    """Problem A solved function
+    """
+    solution = input_string
+
+    if solution == expected_result:
+        print("Correct solution found:", solution)
+    else:
+        print("Incorrect solution, we got:", solution, "expected:", expected_result)
+
+problem_b(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+problem_b(PROGBLEM_INPUT_TXT, 0)
+print("\n")
