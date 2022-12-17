@@ -192,8 +192,8 @@ def problem_a(input_string :str, expected_result :int):
     else:
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
-problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
-problem_a(PROGBLEM_INPUT_TXT, 3153)
+#problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+#problem_a(PROGBLEM_INPUT_TXT, 3153)
 print("\n")
 
 def problem_b(input_string :str, expected_result):
@@ -202,12 +202,13 @@ def problem_b(input_string :str, expected_result):
     solution :int = 0
     totalTime = 1000000000000
     gameObject = game(input_string)
-    initial = 45
-    repetition = 35
+    initial = 1730
+    repetition = 1705
     times = (totalTime - initial) // repetition
     leftOvers = (totalTime - initial)% repetition
+    keyLength = len(input_string)
 
-    print('Length of input:', len(input_string))
+    print('Length of input:', keyLength)
     for l in range(initial):
         gameObject.addNextSprite()
         cont = True
@@ -231,18 +232,20 @@ def problem_b(input_string :str, expected_result):
     print('command pos', gameObject.currentCommandPos % 40, "H:", gameObject.gameDHight, 'Diff:', diffBetweenRepetition, 'No. sprites', gameObject.currentShape, 'Times: ')
     hight = gameObject.gameDHight
 
-    for k in range(times):
-        for l in range(repetition):
-            gameObject.addNextSprite()
-            cont = True
-            while (cont):
-                gameObject.moveAccordingToCommand()
-                cont = gameObject.fallDownOneStep()
-            gameObject.checkHight()
+    # for k in range(times):
+    #     for l in range(repetition):
+    #         gameObject.addNextSprite()
+    #         cont = True
+    #         while (cont):
+    #             gameObject.moveAccordingToCommand()
+    #             cont = gameObject.fallDownOneStep()
+    #         gameObject.checkHight()
 
-        diff = gameObject.gameDHight - hight
-        print('command pos', gameObject.currentCommandPos % 40, "H:", gameObject.gameDHight, 'Diff:', diff, 'No. sprites', gameObject.currentShape, 'Times: ', k)
-        hight = gameObject.gameDHight
+    #     diff = gameObject.gameDHight - hight
+    #     moduly = gameObject.currentCommandPos % keyLength
+    #     if (moduly == 7) or (moduly == 42):
+    #         print('command pos', gameObject.currentCommandPos % keyLength, "H:", gameObject.gameDHight, 'Diff:', diff, 'No. sprites', gameObject.currentShape, 'Times: ', k)
+    #     hight = gameObject.gameDHight
 
     for l in range(leftOvers):
         gameObject.addNextSprite()
@@ -264,6 +267,6 @@ def problem_b(input_string :str, expected_result):
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
 
-problem_b(EXAMPLE_INPUT1, 1514285714288)
+#problem_b(EXAMPLE_INPUT1, 1514285714288)
 problem_b(PROGBLEM_INPUT_TXT, 0)
 print("\n")
