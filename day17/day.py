@@ -1,9 +1,3 @@
-"""
-Template code
-"""#import cmath for complex number operations
-#from abc import abstractproperty
-#import cmath
-#import Path for file operations
 from pathlib import Path
 
 PROGBLEM_INPUT_TXT = Path("/Users/pergrapatin/Source/AOC2022/"\
@@ -20,12 +14,7 @@ def string_worker(input_string):
     return a_steps
 
 class shapes:
-    def __init__(self, typeId):
-        # 0 -
-        # 1 +
-        # 2 reversed L
-        # 3 I
-        # 4 square
+    def __init__(self, typeId :int):
         self.stringRepresentation :str = []
         match typeId:
             case 0:
@@ -51,8 +40,6 @@ class shapes:
                 self.stringRepresentation.append('|..@@...|')
                 self.stringRepresentation.append('|..@@...|')
                 self.addH = 2
-
-
 
 class game:
     def __init__(self, keyboardscommands :str):
@@ -101,13 +88,9 @@ class game:
                         direction = -1
                     for l in range(1,8):
                         if currentRow[l] == '@':
-                            if currentRow[l + direction] in '@.':
-                                pass
-                            else:
+                            if currentRow[l + direction] in '|#':
                                 possible = False
                                 break
-                    for l in range(len(currentRow)):
-                        if currentRow[l] == '@':
                             newRow = self.swapString(newRow, l + direction, '@')
                     if possible:
                         boardD[currentHigth - i] = newRow 
@@ -128,14 +111,9 @@ class game:
         cont = True
         #fall until no longer possible
         currentFall = boardD.copy()
-        start = self.gameDHight - 5
-        if start < 0:
-            start = 0
+        start = max(self.gameDHight - 5, 0)
         for row in range(start, currentHight):
-            if '@' in boardD[row]:
-                # if row == 0:
-                #     cont = False #we are done
-                #     break              
+            if '@' in boardD[row]:             
                 currentRow = boardD[row]
                 rowBelow = boardD[row - 1]
                 for indexC in range(8):
@@ -192,8 +170,8 @@ def problem_a(input_string :str, expected_result :int):
     else:
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
-#problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
-#problem_a(PROGBLEM_INPUT_TXT, 3153)
+problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+problem_a(PROGBLEM_INPUT_TXT, 3153)
 print("\n")
 
 def problem_b(input_string :str, expected_result):
@@ -268,5 +246,5 @@ def problem_b(input_string :str, expected_result):
 
 
 #problem_b(EXAMPLE_INPUT1, 1514285714288)
-problem_b(PROGBLEM_INPUT_TXT, 0)
+problem_b(PROGBLEM_INPUT_TXT, 1553665689155)
 print("\n")
