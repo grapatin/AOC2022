@@ -1,0 +1,182 @@
+"""
+Template code
+"""#import cmath for complex number operations
+#from abc import abstractproperty
+#import cmath
+#import Path for file operations
+from pathlib import Path
+import copy
+import re
+import itertools
+import time
+from typing import Self
+
+PROGBLEM_INPUT_TXT = Path("/Users/pergrapatin/Source/AOC2022/"\
+    +"day16/input.txt").read_text()
+
+EXAMPLE_INPUT1 = """Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
+Valve BB has flow rate=13; tunnels lead to valves CC, AA
+Valve CC has flow rate=2; tunnels lead to valves DD, BB
+Valve DD has flow rate=20; tunnels lead to valves CC, AA, EE
+Valve EE has flow rate=3; tunnels lead to valves FF, DD
+Valve FF has flow rate=0; tunnels lead to valves EE, GG
+Valve GG has flow rate=0; tunnels lead to valves FF, HH
+Valve HH has flow rate=22; tunnel leads to valve GG
+Valve II has flow rate=0; tunnels lead to valves AA, JJ
+Valve JJ has flow rate=21; tunnel leads to valve II"""
+EXAMPLE_RESULT1 = 1651
+
+def string_worker(input_string):
+    """Helper string worker function
+    """
+    a_steps = input_string.split("\n")
+    #a_steps = [int(number) for number in input_string.split(',')]
+    return a_steps
+
+class valve:
+    def __init__(self, stringI):
+        parts = stringI.split(' ')
+        self.name = parts[1]
+        self.pressure = int(re.findall('[-0-9]+', parts[4])[0])
+        self.connectingValves = []
+        valvesSplit = stringI[1:].split('valves') #destroyng first valve
+        if len(valvesSplit) == 1:
+            valvesSplit = stringI[1:].split('valve') #destroyng first valve
+        self.connectingValves = valvesSplit[1].lstrip().split(', ')
+        self.open = False
+        self.openTime = -1
+
+class maze:
+    def __init__(self, mazeString) -> None:
+        self.mazeD = {}
+        rows = mazeString.split('\n')
+        self.timeToSpend = 30
+        self.numberOfValvesWithP = 0
+        self.valvesOfImportance = ['AA']
+        self.distanceMaze = {}
+        self.pairsD = {}
+        self.highScore = 0
+        for row in rows:
+            valveInstance = valve(row)
+            self.mazeD[valveInstance.name] = valveInstance
+            if valveInstance.pressure > 0:
+                self.numberOfValvesWithP += 1
+                self.valvesOfImportance.append(valveInstance.name)
+
+    def findDistanceBetweenAllImportantValves(self):
+        #create possible pairs
+        length = self.numberOfValvesWithP + 1
+        for i in range(length):
+            for l in range(i+1, length):
+                iV = self.valvesOfImportance[i]
+                lV = self.valvesOfImportance[l]
+
+                if iV not in self.pairsD:
+                    self.pairsD[iV] = [lV]
+                else:
+                    self.pairsD[iV].append(lV)
+                if lV not in self.pairsD:
+                    self.pairsD[lV] = [iV]
+                else:
+                    self.pairsD[lV].append(iV)
+
+        for startNode in self.pairsD:
+            for endNode in self.pairsD[startNode]:
+                self.findShortestDistanceBetween(startNode, startNode, endNode, '', -1)
+        
+    def findShortestDistanceBetween(self :Self, startPos :str, A :str, targetPos:str, visitedPos :str, distanceTraveled :int):
+        currentPos :valve = self.mazeD[A]
+        visitedPos += ',' + A
+        distanceTraveled += 1
+        if A == targetPos:  
+            route = startPos + ',' + targetPos
+            if route not in self.distanceMaze:
+                self.distanceMaze[route] = distanceTraveled
+            else:
+                if distanceTraveled < self.distanceMaze[route]:
+                    self.distanceMaze[route] = distanceTraveled
+            return
+        for nextPos in currentPos.connectingValves:
+            if nextPos not in visitedPos:
+                self.findShortestDistanceBetween(startPos, nextPos, targetPos, visitedPos, distanceTraveled)
+
+    def enableValves(self, currentValve, visitValves, currentScore, currentTime):
+        for nextPos in self.pairsD[currentValve]:
+            if nextPos not in visitValves:
+                #get the travel time.
+                travelTime = self.distanceMaze[currentValve + ',' + nextPos] + 1 #for opening valve
+                if (currentTime + travelTime) < self.timeToSpend:
+                    newScore = (self.timeToSpend - (currentTime + travelTime))*self.mazeD[nextPos].pressure + currentScore
+                    if newScore > self.highScore:
+                        self.highScore = newScore
+                    self.enableValves(nextPos, visitValves + ',' + nextPos, newScore, currentTime + travelTime)
+
+                    
+    def enableValvesPart2(self, currentValveG1, currentValveG2, visitValves, currentScore, currentTimeG1, currentTimeG2):
+        triedCombos = {}
+        for nextPosG1 in self.pairsD[currentValveG1]:
+            for nextPosG2 in self.pairsD[currentValveG2]:
+                if nextPosG1 != nextPosG2:         
+                    if nextPosG1 not in visitValves and nextPosG2 not in visitValves:
+                        if nextPosG1 + ',' + nextPosG2 not in triedCombos:
+                            travelTimeG1 = self.distanceMaze[currentValveG1 + ',' + nextPosG1] + 1 #for opening valve
+                            travelTimeG2 = self.distanceMaze[currentValveG2 + ',' + nextPosG2] + 1 #for opening valve
+
+                            if (currentTimeG1 + travelTimeG1) < self.timeToSpend and (currentTimeG2 + travelTimeG2) < self.timeToSpend:
+                                if currentTimeG1 == 0:
+                                    triedCombos[nextPosG1 + ',' + nextPosG2] = True
+                                    triedCombos[nextPosG2 + ',' + nextPosG1] = True
+                                #get the travel time.
+                                newScore = (self.timeToSpend - (currentTimeG1 + travelTimeG1))*self.mazeD[nextPosG1].pressure + (self.timeToSpend - (currentTimeG2 + travelTimeG2))*self.mazeD[nextPosG2].pressure + currentScore
+                                if newScore > self.highScore:
+                                    self.highScore = newScore
+                                    print('New High score', self.highScore)
+                                self.enableValvesPart2(nextPosG1, nextPosG2, visitValves + ',' + nextPosG1 + '' + nextPosG2, newScore, currentTimeG1 + travelTimeG1, currentTimeG2 + travelTimeG2)
+                                
+               
+
+def problem_a(input_string, expected_result):
+    """Problem A solved function
+    """
+    solution = 0
+    mazeI = maze(input_string)
+
+    mazeI.findDistanceBetweenAllImportantValves()
+    mazeI.enableValves('AA', 'AA', 0, 0)
+
+    solution = mazeI.highScore
+    if solution == expected_result:
+        print("Correct solution found:", solution)
+    else:
+        print("Incorrect solution, we got:", solution, "expected:", expected_result)
+
+problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+problem_a(PROGBLEM_INPUT_TXT, 1857)
+print("\n")
+
+def problem_b(input_string, expected_result):
+    """Problem A solved function
+    """
+    
+    solution = 0
+    mazeI = maze(input_string)
+
+    mazeI.timeToSpend = 26
+
+    mazeI.findDistanceBetweenAllImportantValves()
+    mazeI.enableValvesPart2('AA', 'AA', '', 0, 0, 0) 
+
+    solution = mazeI.highScore
+    if solution == expected_result:
+        print("Correct solution found:", solution)
+    else:
+        print("Incorrect solution, we got:", solution, "expected:", expected_result)
+
+
+startT = time.process_time()
+problem_b(EXAMPLE_INPUT1, 1707)
+print('Example completed in', time.process_time() - startT, ' s')
+startT = time.process_time()
+problem_b(PROGBLEM_INPUT_TXT, 2536)
+print('Part II completed in', time.process_time() - startT, 's')
+print("\n")

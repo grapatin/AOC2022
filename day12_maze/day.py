@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 PROGBLEM_INPUT_TXT = Path("/Users/pergrapatin/Source/AOC2022/"\
-    +"day12/input.txt").read_text()
+    +"day12_maze/input.txt").read_text()
 
 EXAMPLE_INPUT1 = """Sabqponm
 abcryxxl
@@ -50,43 +50,30 @@ class mazeMove():
         for rowN in range(self.lengthR):
             for cN in range(self.lengthC):
                 self.mazeD[self.fixIt(cN, rowN)] = posC(rows[rowN][cN])
+                if rows[rowN][cN] == 'S':
+                    self.startX = cN
+                    self.startY = rowN
     
     def mover(self, currentX, currentY, direction, currentHight):
         match direction:
             case 'up':
                 if currentY > 0:
                     currentY -= 1
-                    newHight = self.mazeD[self.fixIt(currentX,currentY)].hight
-                    if newHight - currentHight < 2:
-                        return True, currentX, currentY
-                    else:
-                        return False, currentX, currentY
             case 'down':
                 if currentY < self.lengthR - 1:
                     currentY += 1
-                    newHight = self.mazeD[self.fixIt(currentX,currentY)].hight
-                    if newHight - currentHight < 2:
-                        return True, currentX, currentY
-                    else:
-                        return False, currentX, currentY
             case 'left':
                 if currentX > 0:
                     currentX -= 1                    
-                    newHight = self.mazeD[self.fixIt(currentX,currentY)].hight
-                    if newHight - currentHight < 2:
-                        return True, currentX, currentY
-                    else:
-                        return False, currentX, currentY           
             case 'right':
                 if currentX < self.lengthC - 1:
                     currentX += 1
-                    newHight = self.mazeD[self.fixIt(currentX,currentY)].hight
-                    if newHight - currentHight < 2:
-                        return True, currentX, currentY
-                    else:
-                        return False, currentX, currentY
-
-        return False, currentX, currentY
+   
+        newHight = self.mazeD[self.fixIt(currentX,currentY)].hight
+        if newHight - currentHight < 2:
+            return True, currentX, currentY
+        else:
+            return False, currentX, currentY
     
     def workerS(self, posX, posY, steps):
         currentHight = self.mazeD[self.fixIt(posX,posY)].hight
@@ -102,7 +89,7 @@ class mazeMove():
                         object.shortestPath = steps
                         if object.target == True:
                             self.newBest = steps
-                            print('Target found after this many steps:', steps)
+                            # print('Target found after this many steps:', steps)
                         else:
                             self.workerS(newX, newY, steps)
                     else:
@@ -111,26 +98,20 @@ class mazeMove():
     def fixIt(self, x, y):
         return str(x)+ ',' + str(y)
 
-def problem_a(input_string, startRow, expected_result):
+def problem_a(input_string, expected_result):
     """Problem A solved function
     """
     solution = 0
-
     maze = mazeMove(input_string)
-
-    maze.workerS(0,startRow,0)
-
+    maze.workerS(maze.startX,maze.startY,0)
     solution = maze.newBest
-
     if solution == expected_result:
         print("Correct solution found:", solution)
     else:
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
-
-sys.setrecursionlimit(100000)
-problem_a(EXAMPLE_INPUT1, 0, EXAMPLE_RESULT1)
-#problem_a(PROGBLEM_INPUT_TXT, 20, 0)
+problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+problem_a(PROGBLEM_INPUT_TXT, 420)
 print("\n")
 
 def getPossibleStartingPos(maze):
@@ -138,7 +119,6 @@ def getPossibleStartingPos(maze):
     for key, value in maze.mazeD.items():
         if value.hight == ord('a'):
             possibleStart.append(key)
-
     return possibleStart
 
 
@@ -146,9 +126,7 @@ def problem_b(input_string, expected_result):
     """Problem A solved function
     """
     solution = 999999
-
     maze = mazeMove(input_string)
-
     possibleStart = getPossibleStartingPos(maze)
     for start in possibleStart:
         values = start.split(',')
@@ -163,5 +141,5 @@ def problem_b(input_string, expected_result):
 
 
 problem_b(EXAMPLE_INPUT1, 29)
-problem_b(PROGBLEM_INPUT_TXT, 0)
+problem_b(PROGBLEM_INPUT_TXT, 414)
 print("\n")

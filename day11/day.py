@@ -115,6 +115,25 @@ class monkey:
             self.numberOfInspections += 1
         self.items = []
 
+    def doMonkey3(self, monkeyD):
+        newRisk = 0
+        for item in self.items:
+            if self.operand == '*':
+                if self.operationPart2 == 'old':
+                    newRisk = item*item
+                else:
+                    newRisk = item*int(self.operationPart2)
+            else: # '+' 
+                    newRisk = item+int(self.operationPart2)
+            newRisk = newRisk % (2*3*5*7*11*13*17*19*23)
+            divD = newRisk % self.testNumber
+            if divD == 0:
+                monkeyD[self.ifTrueNewMonkey].add(newRisk)
+            else:
+                monkeyD[self.ifFalseNewMonkey].add(newRisk)
+            self.numberOfInspections += 1
+        self.items = []
+
     def doMonkeyPart2(self, monkeyD):
         newRisk = 0
         for item in self.itemsF:
@@ -178,7 +197,7 @@ def problem_b(input_string, expected_result):
     length = len(parts)
     for turns in range(10000):
             for l in range(length):
-                monkeyD[l].doMonkeyPart2(monkeyD)
+                monkeyD[l].doMonkey3(monkeyD)
             #print('l = ', turns)
 
     inspections = []
