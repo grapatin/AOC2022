@@ -81,10 +81,10 @@ class dropletsClass:
     def countManhattanDistanceBetweenDropletandouterAir(self):
         counter = 0
         for point1 in self.storageD.values():
-            if point1[3] == 'outerair':
+            if point1[3] == 'droplet':
                 for point2 in self.storageD.values():
                     if point1 != point2:
-                        if point2[3] == 'unknownair':
+                        if point2[3] == 'outerair':
                             distance = abs(point1[0]-point2[0]) + abs(point1[1]-point2[1]) + abs(point1[2]-point2[2])
                             if distance == 1:
                                 counter += 1
@@ -100,7 +100,7 @@ class dropletsClass:
         adjentPoint.append( [x, y + 1, z])
         adjentPoint.append( [x, y - 1, z])
         adjentPoint.append( [x, y, z + 1])
-        adjentPoint.append( [x, y, z + 1])
+        adjentPoint.append( [x, y, z - 1])
 
         for aPoint in adjentPoint:
             cordS = str(aPoint[0]) + ',' + str(aPoint[1]) + ',' + str(aPoint[2])
