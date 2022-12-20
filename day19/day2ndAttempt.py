@@ -69,6 +69,9 @@ class optimizeProduction:
          numberOfOre, numberOfClay, numberOfObsidian, numberOfGeode, time, targetMetall, cacheInput, maxTime):
         #first build with what we got
         TurnsLeft = maxTime - time
+        if numberOfGeodeRobots == 0 and TurnsLeft == 10 and self.maxGeodes > 45:
+            #give up
+            return 
         if time < maxTime:
             if targetMetall != 'noTargetMetal':
                 allMetals = [targetMetall]
@@ -113,8 +116,6 @@ class optimizeProduction:
                                     targetMetall = metal
                                 else:
                                     continue
-                        else:
-                            continue
                     case 'geode':
                         if numberOfOre >= self.bluePrintC.getGeodeCost(self.bluePrintId)[0] and numberOfObsidian >= self.bluePrintC.getGeodeCost(self.bluePrintId)[1]:
                             OreConsumed +=self.bluePrintC.getGeodeCost(self.bluePrintId)[0]
@@ -168,32 +169,28 @@ def problem_a(input_string :str, expected_result):
     else:
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
-problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
-problem_a(PROGBLEM_INPUT_TXT, 1150)  # 1097 too low
+#problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+#pythonproblem_a(PROGBLEM_INPUT_TXT, 1150)  # 1097 too low
 print("\n")
 
 def problem_b(input_string, expected_result):
     """Problem A solved function
     """
-    solution = 0
+    solution = 1
     bluePrints = robotFactoryBluePrint(input_string)
     rows = input_string.splitlines()
 
-    for i in range(len(rows)):
+    for i in range(3):
         optimizer = optimizeProduction(i + 1, bluePrints)
         optimizer.worker(1, 0, 0, 0, 0, 0, 0, 0, 0, 'noTargetMetal', '', 32)   
         bPrintG = optimizer.maxGeodes
-        solution += bPrintG * (i + 1)
+        solution = bPrintG * solution
+        
     if solution == expected_result:
         print("Correct solution found:", solution)
     else:
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
-    if solution == expected_result:
-        print("Correct solution found:", solution)
-    else:
-        print("Incorrect solution, we got:", solution, "expected:", expected_result)
-
-problem_b(EXAMPLE_INPUT1, 56+62*2)
-#problem_b(PROGBLEM_INPUT_TXT, 0)
+#problem_b(EXAMPLE_INPUT1, 56+62*2)
+problem_b(PROGBLEM_INPUT_TXT, 37367)
 print("\n")
