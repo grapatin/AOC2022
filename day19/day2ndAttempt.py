@@ -30,7 +30,13 @@ class robotFactoryBluePrint:
             self.bluePrintD[int(numbersInString[0])] = numbersInString[1:]
 
     def getMaximumOreNeeded(self, bluePrintId):
-        return int(max(self.bluePrintD[bluePrintId][0], self.bluePrintD[bluePrintId][1], self.bluePrintD[bluePrintId][2], self.bluePrintD[bluePrintId][4]))
+        return max(int(self.bluePrintD[bluePrintId][1]), int(self.bluePrintD[bluePrintId][2]), int(self.bluePrintD[bluePrintId][4]))
+
+    def getMaximumClayNeeded(self, bluePrintId):
+        return int(self.bluePrintD[bluePrintId][3])
+
+    def getMaximumObsidianNeeded(self, bluePrintId):
+        return int(self.bluePrintD[bluePrintId][5])
 
     def getOreCost(self, bluePrintId :int) -> int:
         return int(self.bluePrintD[bluePrintId][0])
@@ -51,17 +57,19 @@ class optimizeProduction:
         self.bluePrintId = bluePrintID
         self.maxGeodes = 0
         self.allMetals = ['ore', 'clay', 'obsidian', 'geode']
-        #self.allMetals.reverse()
+        self.allMetals.reverse()
         self.cacheD = {}
         self.MaxOreNeeded = bluePrintClass.getMaximumOreNeeded(bluePrintID)
+        self.MaxClayNeeded = bluePrintClass.getMaximumClayNeeded(bluePrintID)
+        self.MaxObsidianNeeded = bluePrintClass.getMaximumObsidianNeeded(bluePrintID)
 
     
 
     def worker(self, numberOfOreRobots, numberOfClayRobots, numberOfObsidianRobots, numberOfGeodeRobots, \
-         numberOfOre, numberOfClay, numberOfObsidian, numberOfGeode, time, targetMetall, cacheInput):
+         numberOfOre, numberOfClay, numberOfObsidian, numberOfGeode, time, targetMetall, cacheInput, maxTime):
         #first build with what we got
-        TurnsLeft = 24 - time
-        if time < 24:
+        TurnsLeft = maxTime - time
+        if time < maxTime:
             if targetMetall != 'noTargetMetal':
                 allMetals = [targetMetall]
             else:
@@ -81,26 +89,32 @@ class optimizeProduction:
                         else:
                             continue
                     case 'clay':
-                        if numberOfOre >= self.bluePrintC.getClayCost(self.bluePrintId):
-                            OreConsumed += self.bluePrintC.getClayCost(self.bluePrintId)
-                            newClayRobots = 1
-                            targetMetall = 'noTargetMetal'
-                        else:
-                            if numberOfOreRobots > 0 and (numberOfOreRobots * TurnsLeft + numberOfOre) >= self.bluePrintC.getClayCost(self.bluePrintId):
-                                targetMetall = metal
+                        if numberOfClayRobots < self.MaxClayNeeded:
+                            if numberOfOre >= self.bluePrintC.getClayCost(self.bluePrintId):
+                                OreConsumed += self.bluePrintC.getClayCost(self.bluePrintId)
+                                newClayRobots = 1
+                                targetMetall = 'noTargetMetal'
                             else:
-                                continue
+                                if numberOfOreRobots > 0 and (numberOfOreRobots * TurnsLeft + numberOfOre) >= self.bluePrintC.getClayCost(self.bluePrintId):
+                                    targetMetall = metal
+                                else:
+                                    continue
+                        else:
+                            continue
                     case 'obsidian':
-                        if numberOfOre >= self.bluePrintC.getObsidianCost(self.bluePrintId)[0] and numberOfClay >= self.bluePrintC.getObsidianCost(self.bluePrintId)[1]:
-                            OreConsumed +=self.bluePrintC.getObsidianCost(self.bluePrintId)[0]
-                            ClayConsumed +=self.bluePrintC.getObsidianCost(self.bluePrintId)[1]
-                            newObsidianRobots = 1
-                            targetMetall = 'noTargetMetal'
-                        else:
-                            if numberOfClayRobots > 0 and (numberOfClayRobots * TurnsLeft + numberOfClay) >= self.bluePrintC.getObsidianCost(self.bluePrintId)[1]:
-                                targetMetall = metal
+                        if numberOfObsidianRobots < self.MaxObsidianNeeded:
+                            if numberOfOre >= self.bluePrintC.getObsidianCost(self.bluePrintId)[0] and numberOfClay >= self.bluePrintC.getObsidianCost(self.bluePrintId)[1]:
+                                OreConsumed +=self.bluePrintC.getObsidianCost(self.bluePrintId)[0]
+                                ClayConsumed +=self.bluePrintC.getObsidianCost(self.bluePrintId)[1]
+                                newObsidianRobots = 1
+                                targetMetall = 'noTargetMetal'
                             else:
-                                continue
+                                if numberOfClayRobots > 0 and (numberOfClayRobots * TurnsLeft + numberOfClay) >= self.bluePrintC.getObsidianCost(self.bluePrintId)[1]:
+                                    targetMetall = metal
+                                else:
+                                    continue
+                        else:
+                            continue
                     case 'geode':
                         if numberOfOre >= self.bluePrintC.getGeodeCost(self.bluePrintId)[0] and numberOfObsidian >= self.bluePrintC.getGeodeCost(self.bluePrintId)[1]:
                             OreConsumed +=self.bluePrintC.getGeodeCost(self.bluePrintId)[0]
@@ -128,7 +142,7 @@ class optimizeProduction:
                         ',' + str(ClayForNS) + ',' + str(ObsidianForNS) + ',' + str(GeodeForNS) + ',' + str(time) + targetMetall
                 if cachString not in self.cacheD:
                     self.worker(OreRobotsForNS, ClayRobotsForNS, ObsidianRobotsForNS, GeodeRobotsForNS,\
-                         OreForNS, ClayForNS, ObsidianForNS, GeodeForNS, time + 1, targetMetall, cachString)
+                         OreForNS, ClayForNS, ObsidianForNS, GeodeForNS, time + 1, targetMetall, cachString, maxTime)
                     #Add to cache
                     self.cacheD[cachString] = self.maxGeodes
         else:
@@ -146,7 +160,7 @@ def problem_a(input_string :str, expected_result):
 
     for i in range(len(rows)):
         optimizer = optimizeProduction(i + 1, bluePrints)
-        optimizer.worker(1, 0, 0, 0, 0, 0, 0, 0, 0, 'noTargetMetal', '')   
+        optimizer.worker(1, 0, 0, 0, 0, 0, 0, 0, 0, 'noTargetMetal', '', 24)   
         bPrintG = optimizer.maxGeodes
         solution += bPrintG * (i + 1)
     if solution == expected_result:
@@ -155,19 +169,31 @@ def problem_a(input_string :str, expected_result):
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
 problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
-problem_a(PROGBLEM_INPUT_TXT, 0)  # 1097 too low
+problem_a(PROGBLEM_INPUT_TXT, 1150)  # 1097 too low
 print("\n")
 
 def problem_b(input_string, expected_result):
     """Problem A solved function
     """
     solution = 0
+    bluePrints = robotFactoryBluePrint(input_string)
+    rows = input_string.splitlines()
+
+    for i in range(len(rows)):
+        optimizer = optimizeProduction(i + 1, bluePrints)
+        optimizer.worker(1, 0, 0, 0, 0, 0, 0, 0, 0, 'noTargetMetal', '', 32)   
+        bPrintG = optimizer.maxGeodes
+        solution += bPrintG * (i + 1)
+    if solution == expected_result:
+        print("Correct solution found:", solution)
+    else:
+        print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
     if solution == expected_result:
         print("Correct solution found:", solution)
     else:
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
-#problem_b(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+problem_b(EXAMPLE_INPUT1, 56+62*2)
 #problem_b(PROGBLEM_INPUT_TXT, 0)
 print("\n")
