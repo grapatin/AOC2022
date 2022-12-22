@@ -102,13 +102,6 @@ def problem_b(input_string, expected_result):
     print(leftPartOrginal)
 
     rightResult = int(eval(rightPartOrginal))
-
-   #x = 1000000000000 195164213502774
-    #x = 4000000000000 54564213502774
-    #x = 3800000000000 63937546836107
-    x = 3800000000000
-
-
     cont = True
     x = 3800000000000
     delta = 300000000000
