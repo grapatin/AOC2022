@@ -173,6 +173,11 @@ class boardClassPart2:
         startY = 2 * size
         array6 = self.createCubeSide(size, startX, startY)
 
+        # '' array
+        startX = 0
+        startY = 0
+        arrayEmpty = self.createCubeSide(size, startX, startY)
+
         arrayA = np.array(array1)
         arrayB = np.array(array4)
         arrayC = np.array(array5)
@@ -180,7 +185,37 @@ class boardClassPart2:
         arrayE = np.rot90(np.array(array6), 2) #180 degrees
         arrayF = np.rot90(np.array(array3), 1) # rotate 90
 
-        pass
+        #Create a new matrix based on above
+        arrayRow1 = np.concatenate((arrayEmpty, arrayD, arrayEmpty), axis=1)
+        arrayRow2 = np.concatenate((arrayF, arrayA, arrayE), axis=1)
+        arrayRow3 = np.concatenate((arrayEmpty, arrayB, arrayEmpty), axis=1)
+        arrayCompleteA = np.concatenate((arrayRow1, arrayRow2, arrayRow3), axis = 0)
+
+        arrayRow1 = np.concatenate((arrayEmpty, arrayA, arrayEmpty), axis=1)
+        arrayRow2 = np.concatenate((np.rot90(arrayF, -1), arrayB, np.rot90(arrayE, 1)), axis=1)
+        arrayRow3 = np.concatenate((arrayEmpty, arrayC, arrayEmpty), axis=1)
+        arrayCompleteB = np.concatenate((arrayRow1, arrayRow2, arrayRow3), axis = 0)
+
+        arrayRow1 = np.concatenate((arrayEmpty, arrayB, arrayEmpty), axis=1)
+        arrayRow2 = np.concatenate((np.rot90(arrayF, -2), arrayC, np.rot90(arrayE, 2)), axis=1)
+        arrayRow3 = np.concatenate((arrayEmpty, arrayD, arrayEmpty), axis=1)
+        arrayCompleteC = np.concatenate((arrayRow1, arrayRow2, arrayRow3), axis = 0)
+
+        arrayRow1 = np.concatenate((arrayEmpty, arrayC, arrayEmpty), axis=1)
+        arrayRow2 = np.concatenate((np.rot90(arrayF, -3), arrayD, np.rot90(arrayE, 3)), axis=1)
+        arrayRow3 = np.concatenate((arrayEmpty, arrayA, arrayEmpty), axis=1)
+        arrayCompleteD = np.concatenate((arrayRow1, arrayRow2, arrayRow3), axis = 0)
+    
+        arrayRow1 = np.concatenate((arrayEmpty, np.rot90(arrayD, 1), arrayEmpty), axis=1)
+        arrayRow3 = np.concatenate((arrayA, arrayE, np.rot90(arrayC, 2)), axis=1)
+        arrayRow4 = np.concatenate((arrayEmpty, np.rot90(arrayB, -1), arrayEmpty), axis=1)
+        arrayCompleteE = np.concatenate((arrayRow1, arrayRow2, arrayRow3, arrayRow4), axis = 0)
+    
+        arrayRow1 = np.concatenate((arrayEmpty, np.rot90(arrayD, -1), arrayEmpty), axis=1)
+        arrayRow3 = np.concatenate((np.rot90(arrayC, 2), arrayF, arrayA), axis=1)
+        arrayRow4 = np.concatenate((arrayEmpty, np.rot90(arrayB, 1), arrayEmpty), axis=1)
+        arrayCompleteF = np.concatenate((arrayRow1, arrayRow2, arrayRow3, arrayRow4), axis = 0)
+
 
     def createCubeSide(self, size :int, startX :int, startY :int) -> list[list]:
         array = []
