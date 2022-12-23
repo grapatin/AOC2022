@@ -23,6 +23,10 @@ EXAMPLE_INPUT1 = """        ...#
         .....#..
         .#......
         ......#.
+                
+                
+                
+                
 
 10R5L5R10L4R5L5
 """
@@ -65,6 +69,24 @@ class boardClass:
 
         self.currentPosition = np.array([startPos, 0])
 
+    def printStatus(self):
+        for y in range(self.maxY):
+            for x in range(self.maxX):
+                if self.currentPosition[0] == x and self.currentPosition[1] == y:
+                    match self.facingDirection:
+                        case 0:
+                            symbol = '>'
+                        case 1:
+                            symbol = 'v'
+                        case 2:
+                            symbol = '<'
+                        case 3:
+                            symbol = '^'
+                    print(symbol, end='')
+                else:
+                    print(self.mapD[self.fixIt(x,y)], end= '')
+            print('')
+        print('\n')
 
     def processCommands(self):
         cont = True
@@ -73,6 +95,7 @@ class boardClass:
             noSteps = self.steps[self.commandPos]
             steps = int(noSteps)
             for _ in range(steps):
+                self.printStatus()
                 previousPos = self.currentPosition
                 nextPos = self.currentPosition + self.possibleDirections[self.facingDirection]
                 nextPos = nextPos % self.maxA #keep us within bound
@@ -108,8 +131,6 @@ class boardClass:
 
     def fixNP(self, pos :np.array):
         return str(pos[0])+','+str(pos[1])
-
-
 
     def __init__(self, inputString :str):
         self.mapD = {}
@@ -194,6 +215,7 @@ class boardClassPart2:
         size = 4 #example part 2
         checkMe = []
         moveFrom = moveTo = 0
+        newfacingDirection = -1
         oneX = [2*size, 3*size]
         oneY = [0, size]
         checkMe.append(oneX + oneY)
@@ -237,25 +259,69 @@ class boardClassPart2:
         _12Y = [2*size, 3*size]
         checkMe.append(_12X + _12Y)
 
+        _13X = [2*size, 3*size]
+        _13Y = [3*size, 4*size]
+        checkMe.append(_13X + _13Y)
+
+        _14X = [3*size, 4*size]
+        _14Y = [3*size, 4*size]
+        checkMe.append(_14X + _14Y)
+
         for i in range(6):
             if checkMe[i][0] <= previousPos[0] < checkMe[i][1] and checkMe[i][2] <= previousPos[1] < checkMe[i][3]:
                 moveFrom = i + 1
                 break
         
-        for i in range(6, 12):
+        for i in range(6, len(checkMe)):
             if checkMe[i][0] <= nextPos[0] < checkMe[i][1] and checkMe[i][2] <= nextPos[1] < checkMe[i][3]:
                 moveTo = i + 1
                 break
         print('We are moving from:', moveFrom, '->', moveTo)
-        deltaXFrom = checkMe[moveFrom - 1][]
+        deltaXFrom = previousPos[0] % size
+        deltaYFrom = previousPos[1] % size
         match moveFrom:
-            case 2:
+            case 4:
                 match moveTo:
                     case 10:
                         #move to 6 top moving down 
-                        #y becomes x
-                        nextPos = []
+                        #x becomes (size - old_y)
+                        nextPos = [(size -deltaYFrom - 1) + 3*size, 2*size]
+                        newfacingDirection = 1
+            case 5:
+                match moveTo:
+                    case 13:
+                        #move to 2 moving U
+                        # x
+                        newfacingDirection = 3
+                        nextPos = [size - deltaXFrom - 1, 2*size - 1]
+            case 3:
+                match moveTo:
+                    case 8:
+                        #move to 1 moving R
+                        #x becomes y
+                        newfacingDirection = 0
+                        nextPos = [2*size, deltaXFrom]
+        
+        return nextPos, newfacingDirection
 
+    def printStatus(self):
+        for y in range(self.maxY):
+            for x in range(self.maxX):
+                if self.currentPosition[0] == x and self.currentPosition[1] == y:
+                    match self.facingDirection:
+                        case 0:
+                            symbol = '>'
+                        case 1:
+                            symbol = 'v'
+                        case 2:
+                            symbol = '<'
+                        case 3:
+                            symbol = '^'
+                    print(symbol, end='')
+                else:
+                    print(self.mapD[self.fixIt(x,y)], end= '')
+            print('')
+        print('\n')
 
     def processCommands(self):
         cont = True
@@ -264,6 +330,7 @@ class boardClassPart2:
             noSteps = self.steps[self.commandPos]
             steps = int(noSteps)
             for _ in range(steps):
+                self.printStatus()
                 previousPos = self.currentPosition
                 nextPos = self.currentPosition + self.possibleDirections[self.facingDirection]
                 nextPos = nextPos % self.maxA #keep us within bound
@@ -273,15 +340,17 @@ class boardClassPart2:
                 elif nextSym == '.':
                     self.currentPosition = nextPos
                 elif nextSym == ' ':
-                    self.outOfBounds(previousPos, nextPos)
                     #are we out of bounds
                     #lets move inbound
-                    while (nextSym == ' '):
-                        nextPos = nextPos+ self.possibleDirections[self.facingDirection]
-                        nextPos = nextPos % self.maxA
-                        nextSym = self.mapD[self.fixNP(nextPos)] #means wrap
+                    #while (nextSym == ' '):
+                        #nextPos = nextPos+ self.possibleDirections[self.facingDirection]
+                        #nextPos = nextPos % self.maxA
+                    nextPos, newDirection = self.outOfBounds(previousPos, nextPos)
+                    nextSym = self.mapD[self.fixNP(nextPos)] #means wrap
                     if nextSym == '#':
                         nextPos = previousPos # we hit a wall revert back to last real position
+                    else:
+                        self.facingDirection = newDirection
                     self.currentPosition = nextPos
             if self.commandPos < len(self.turns):
                 match self.turns[self.commandPos]:
@@ -314,8 +383,8 @@ def problem_a(input_string, expected_result):
     else:
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
-problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
-problem_a(PROGBLEM_INPUT_TXT, 1484)
+#problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
+#problem_a(PROGBLEM_INPUT_TXT, 1484)
 print("\n")
 
 def problem_b(input_string, expected_result):
@@ -332,5 +401,5 @@ def problem_b(input_string, expected_result):
         print("Incorrect solution, we got:", solution, "expected:", expected_result)
 
 problem_b(EXAMPLE_INPUT1, 5031)
-problem_b(PROGBLEM_INPUT_TXT, 0)
+#problem_b(PROGBLEM_INPUT_TXT, 0)
 print("\n")
