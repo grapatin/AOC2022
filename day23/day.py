@@ -91,7 +91,6 @@ class planting:
             #     for x in range(14):
             #         print(self.getPos([x,y]), end='')
             #     print('')
-
             suggestMove = {}
             for cord in self.storageD:
                 if self.storageD[cord] == '#':
@@ -114,7 +113,7 @@ class planting:
                             if moveCount == 0:
                                 moveHereA = cordA + np.array([1,0])
                             moveCount += 1
-                    if rounds % 4 == 1:
+                    elif rounds % 4 == 1:
                         if self.checkSouth(cordA):
                             if moveCount == 0:
                                 moveHereA = cordA + np.array([0,1])
@@ -131,7 +130,7 @@ class planting:
                             if moveCount == 0:
                                 moveHereA = cordA + np.array([0,-1])
                             moveCount += 1
-                    if rounds % 4 == 2:
+                    elif rounds % 4 == 2:
                         if self.checkWest(cordA):
                             if moveCount == 0:
                                 moveHereA = cordA + np.array([-1,0])
@@ -148,7 +147,7 @@ class planting:
                             if moveCount == 0:
                                 moveHereA = cordA + np.array([0,1])
                             moveCount += 1
-                    if rounds % 4 == 3:
+                    else:
                         if self.checkEast(cordA):
                             if moveCount == 0:
                                 moveHereA = cordA + np.array([1,0])
@@ -180,7 +179,7 @@ class planting:
                     self.storageD.pop(oldPos, None)
                     self.storageD[moveHereS] = '#'
             if len(suggestMove) == 0:
-                print('Solution:', rounds+1)
+                print('Solution Part 2:', rounds+1)
                 break
             rounds += 1
             if rounds % 10 == 0:
@@ -227,16 +226,3 @@ problem_a(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
 problem_a(PROGBLEM_INPUT_TXT, 0)
 print("\n")
 
-def problem_b(input_string, expected_result):
-    """Problem A solved function
-    """
-    solution = 0
-
-    if solution == expected_result:
-        print("Correct solution found:", solution)
-    else:
-        print("Incorrect solution, we got:", solution, "expected:", expected_result)
-
-problem_b(EXAMPLE_INPUT1, EXAMPLE_RESULT1)
-problem_b(PROGBLEM_INPUT_TXT, 0)
-print("\n")
